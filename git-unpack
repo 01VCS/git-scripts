@@ -1,22 +1,26 @@
 #!/bin/sh
+
 if [ -f .git/objects/pack/*.pack ] | [ -f objects/pack/*.pack ]; then
-   if [ -f .git/objects/pack/*.pack ]; then
-      thisplace=".git/objects"
+  if [ -f .git/objects/pack/*.pack ]; then
+    thisplace=".git/objects"
    else
-      thisplace="objects"
+    thisplace="objects"
 fi
-mkdir /tmp/tmpgit.$$
-GIT_DIR=/tmp/tmpgit.$$ git init
-for pack in $thisplace/pack/*.pack; do
-GIT_DIR=/tmp/tmpgit.$$ git unpack-objects < $pack
-if [ $? -ne 0 ]; then
-echo "Unpack of $pack failed, aborting"
-exit 1
-fi
+  mkdir /tmp/tmpgit.$$
+  GIT_DIR=/tmp/tmpgit.$$ git init
+
+  for pack in $thisplace/pack/*.pack; do
+    GIT_DIR=/tmp/tmpgit.$$ git unpack-objects < $pack
+    if [ $? -ne 0 ]; then
+      echo "Unpack of $pack failed, aborting"
+      exit 1
+    fi
 done
-rsync -a --info=PROGRESS2 --delete /tmp/tmpgit.$$/objects/ $thisplace
-rm -fr /tmp/tmpgit.$$
+
+  rsync -a --info=PROGRESS2 --delete /tmp/tmpgit.$$/objects/ $thisplace
+
+  rm -fr /tmp/tmpgit.$$
 else
-echo "No packs to unpack"
-exit 1
+  echo "No packs to unpack"
+  exit 1
 fi
